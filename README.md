@@ -1,2 +1,5 @@
 MakeWordpressEz
 ===============
+
+
+Bartek test spoko
