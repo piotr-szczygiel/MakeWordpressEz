@@ -1,2 +1,4 @@
 MakeWordpressEz
+
+Pierwszy!
 ===============
