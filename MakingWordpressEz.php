@@ -133,6 +133,8 @@ class MakingWordpressEz
      */
     public function validate_settings( $data )
     {
+        
+
         return $data;
     }
 }
