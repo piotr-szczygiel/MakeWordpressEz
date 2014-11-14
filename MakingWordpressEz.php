@@ -38,6 +38,11 @@ class MakingWordpressEz
     const SECTION_ID = 'making-wp-ez-main-section';
 
     /**
+     * @var string
+     */
+    const FIELD_URL_ID = 'url';
+
+    /**
      * Constructor that sets up the hooks
      */
     public function __construct()
@@ -85,11 +90,12 @@ class MakingWordpressEz
      */
     public function registerPluginOptions()
     {
+        $options = get_option( self::OPTION_GROUP, array() );
+
         register_setting(
             self::OPTION_GROUP,
-            self::OPTION_GROUP,                 // In short, an easy solution is to make $option_group match $option_name.
-            // ( http://codex.wordpress.org/Function_Reference/register_setting )
-            array( $this, 'validate_settings' )
+            self::OPTION_GROUP,                     // identifier that will be used as name for form fields
+            array( $this, 'validateSettings' )
         );
 
         add_settings_section(
@@ -99,15 +105,15 @@ class MakingWordpressEz
             self::MENU_SLUG
         );
 
-        $urlSettingName = 'url';
         add_settings_field(
-            $urlSettingName,
+            self::FIELD_URL_ID,
             __( 'URL to eZ', 'making-wp-ez' ),
             array( $this, 'renderInputField' ),
             self::MENU_SLUG,
             self::SECTION_ID,
             array(
-                'name' => $urlSettingName
+                'name' => self::FIELD_URL_ID,
+                'value' => isset( $options[self::FIELD_URL_ID] ) ? $options[self::FIELD_URL_ID] : ''
             )
         );
     }
@@ -119,15 +125,30 @@ class MakingWordpressEz
     public function renderInputField( array $args )
     {
         ?>
-        <input type="text" name="<?php print $args['name']; ?>" />
+        <input type="text" name="<?php print self::OPTION_GROUP ?>[<?php print $args['name']; ?>]"
+            value="<?php print $args['value'] ?>"/>
         <?php
     }
 
     /**
      * Validate settings and store it in database
+     * @param array $data
+     * @return array
      */
-    public function validate_settings()
+    public function validateSettings( array $data )
     {
+        if ( !filter_var( $data[self::FIELD_URL_ID], FILTER_VALIDATE_URL ) ) {
 
+            add_settings_error(
+                self::MENU_SLUG,
+                self::FIELD_URL_ID,
+                __( 'Given URL address is not correct', 'making-wp-ez' )
+            );
+
+            $options = get_option( self::OPTION_GROUP, array() );
+            $data[self::FIELD_URL_ID] = isset( $options[self::FIELD_URL_ID] ) ? $options[self::FIELD_URL_ID] : '';
+        }
+
+        return $data;
     }
 }
